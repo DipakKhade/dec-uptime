@@ -2,38 +2,12 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ModeToggle } from "./ui/mode-toggle"
 import { Globe, Shield, Clock, Activity, CheckCircle, Server, Zap, ArrowRight } from "lucide-react"
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
-        <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
-          <div className="flex gap-2 items-center">
-            <Activity className="h-6 w-6 text-solana" />
-            <span className="font-bold text-xl gradient-text">dec-uptime</span>
-          </div>
-          <div className="flex flex-1 items-center justify-end space-x-4">
-            <nav className="flex items-center space-x-1">
-              <Link href="#features" className="text-sm font-medium transition-colors hover:text-solana px-3 py-2">
-                Features
-              </Link>
-              <Link href="#pricing" className="text-sm font-medium transition-colors hover:text-solana px-3 py-2">
-                Pricing
-              </Link>
-              <Link href="#about" className="text-sm font-medium transition-colors hover:text-solana px-3 py-2">
-                About
-              </Link>
-              <Link href="#contact" className="text-sm font-medium transition-colors hover:text-solana px-3 py-2">
-                Contact
-              </Link>
-              <ModeToggle />
-              <Button className="solana-gradient hover:opacity-90 transition-opacity">Sign In</Button>
-            </nav>
-          </div>
-        </div>
-      </header>
+     
       <main className="flex-1">
         <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-[0.2] dark:opacity-[0.1]"></div>
