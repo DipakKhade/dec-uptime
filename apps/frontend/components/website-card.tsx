@@ -3,6 +3,7 @@ import { Website } from "@/app/types/website";
 import { formatDistanceToNow } from "date-fns";
 import { WebsiteStatusIcon } from "./website-status-icon";
 import { StatusChart } from "./status-chart";
+import { Trash2 } from "lucide-react";
 
 interface WebsiteCardProps {
   website: Website;
@@ -24,12 +25,12 @@ export function WebsiteCard({ website }: WebsiteCardProps) {
             Last checked {formatDistanceToNow(website.lastChecked)} ago
           </p>
         </div>
+          <Trash2 className="text-gray-400 cursor-pointer hover:text-red-500" />
       </div>
       
       <div className="mt-4">
         <div className="flex justify-between text-xs text-gray-500 mb-1">
           <span>90 days ago</span>
-          <span>Today</span>
         </div>
         <StatusChart history={website.history} />
       </div>
