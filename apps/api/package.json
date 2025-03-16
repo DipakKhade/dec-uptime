@@ -1,11 +1,8 @@
 {
-  "name": "db",
+  "name": "api",
   "module": "index.ts",
   "type": "module",
   "private": true,
-  "exports":{
-    "./client": "./index.ts"
-  },
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -13,7 +10,8 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@prisma/client": "^6.5.0",
-    "prisma": "^6.5.0"
+    "@types/express": "^5.0.0",
+    "express": "^4.21.2",
+    "db":"*"
   }
 }
