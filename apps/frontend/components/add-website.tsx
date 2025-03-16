@@ -7,11 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlusCircle } from "lucide-react";
 
-interface AddWebsiteDialogProps {
-  onAddWebsite: (url: string) => void;
-}
 
-export function AddWebsiteDialog({ onAddWebsite }: AddWebsiteDialogProps) {
+export function AddWebsiteDialog({ onAddWebsite, refreshWebSiteList }: {
+    onAddWebsite: (url: string) => void;
+    refreshWebSiteList: (val:boolean) => void;
+}) {
   const [url, setUrl] = useState("");
   const [open, setOpen] = useState(false);
   
@@ -52,15 +52,12 @@ export function AddWebsiteDialog({ onAddWebsite }: AddWebsiteDialogProps) {
               type="submit" 
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={() => {
-                // Basic URL validation
-                try {
-                //   new URL(url.startsWith('http') ? url : `https://${url}`);
+                
                   onAddWebsite(url);
                   setUrl("");
                   setOpen(false);
-                } catch (error) {
-                    console.error(error);
-                }
+                  refreshWebSiteList(true);
+              
               }}
             >
               Add to Monitoring

@@ -1,9 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle } from "lucide-react";
 import { Website, WebsiteStatus } from "@/app/types/website";
 import { AddWebsiteDialog } from "./add-website";
 import { WebsiteCard } from "./website-card";
+import axios from 'axios';
+import { BACKEND_URL } from "@/config";
 
 // Generate random status for demo purposes
 const getRandomStatus = (): WebsiteStatus => {
@@ -31,63 +33,38 @@ const generateHistory = (days: number = 90): { date: Date; status: WebsiteStatus
   });
 };
 
-const initialWebsites: Website[] = [
-  {
-    id: "awdasda",
-    url: 'example.com',
-    status: 'up',
-    lastChecked: new Date(),
-    history: generateHistory(),
-    uptime: 99.98
-  },
-  {
-    id: "awdasda",
-    url: 'mywebsite.com',
-    status: 'down',
-    lastChecked: new Date(Date.now() - 15 * 60 * 1000), // 15 mins ago
-    history: generateHistory(),
-    uptime: 95.62
-  },
-  {
-    id: "awdasda",
-    url: 'another-site.org',
-    status: 'unknown',
-    lastChecked: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
-    history: generateHistory(),
-    uptime: 97.33
-  }
-];
-
 export function WebsiteMonitor() {
-  const [websites, setWebsites] = useState<Website[]>(initialWebsites);
-  
-  const handleAddWebsite = (url: string) => {
+  const [websites, setWebsites] = useState<Website[]>([]);
+  const [refreshWebsites,SetFefreshWebsites] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetchWebsites();
+  }, [refreshWebsites]);
+
+  const fetchWebsites = async() => {
+    const res = await axios.get(`${BACKEND_URL}/api/v1/getsites`);
+    console.log(res.data);
+    setWebsites( res.data.map((site: Partial<Website>) => {
+        return {
+            ...site,
+            status: 'unknown',
+            lastChecked: new Date(),
+            history: generateHistory(),
+            uptime: 100
+        }
+    }))
+  };
+
+  const handleAddWebsite = async(url: string) => {
     const formattedUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
-    
-    const newWebsite: Website = {
-      id: "awdasda",
-      url: formattedUrl,
-      status: 'unknown',
-      lastChecked: new Date(),
-      history: generateHistory(),
-      uptime: 100
-    };
-    
-    setWebsites(prev => [...prev, newWebsite]);
-    
-    // Simulate status check after adding
-    setTimeout(() => {
-      setWebsites(prev => 
-        prev.map(site => 
-          site.id === newWebsite.id 
-            ? { ...site, status: getRandomStatus() } 
-            : site
-        )
-      );
-    }, 2000);
+    const res = await axios.post(`${BACKEND_URL}/api/v1/addsite`, { url: formattedUrl });
+    console.log(res.data);
+    if(res.data.status === 'success'){
+        fetchWebsites();
+    }
   };
   
-  const hasDownWebsites = websites.some(site => site.status === 'down');
+  const hasDownWebsites = websites?.some(site => site.status === 'down');
   
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8">
@@ -105,11 +82,11 @@ export function WebsiteMonitor() {
       
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-semibold text-white">Current status by service</h1>
-        <AddWebsiteDialog onAddWebsite={handleAddWebsite} />
+        <AddWebsiteDialog onAddWebsite={handleAddWebsite} refreshWebSiteList={SetFefreshWebsites} />
       </div>
       
       <div className="space-y-6">
-        {websites.map(website => (
+        {websites?.map(website => (
           <WebsiteCard key={website.id} website={website} />
         ))}
       </div>
