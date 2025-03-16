@@ -1,14 +1,17 @@
 import express from "express";
 import { authMiddleware } from "./authMiddleware";
 import prisma from "db/client";
+import cors from 'cors';
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 app.use(authMiddleware);
 
-app.post('api/v1/addsite', async(req, res) => { 
-    const userId = req.userId!;
+app.post('/api/v1/addsite', async(req, res) => { 
+    try{
+        const userId = req.userId!;
     const url = req.body.url;
     const website = await prisma.website.create({
         data: {
@@ -18,9 +21,13 @@ app.post('api/v1/addsite', async(req, res) => {
         }
     });
     res.json(website);
+    }catch(e){
+        console.log(e);
+        res.status(500).json({message: "Internal Server Error"});
+    }
 });
 
-app.get('api/v1/getsites', async(req, res) => { 
+app.get('/api/v1/getsites', async(req, res) => { 
     const userId = req.userId!;
     const websites = await prisma.website.findMany({
         where: {
@@ -30,16 +37,16 @@ app.get('api/v1/getsites', async(req, res) => {
     res.json(websites);
 });
 
-app.delete('api/v1/deletesite', async(req, res) => { 
+app.delete('/api/v1/deletesite', async(req, res) => { 
     const userId = req.userId!;
-    const url = req.body.url;
+    const websiteId = req.body.id;
     const website = await prisma.website.delete({
         where: {
-            url,
+            id:websiteId,
             userId
         }
     });
     res.json(website);
 });
 
-app.listen(3000, () => console.log("Listening on port 3000"));
+app.listen(3001, () => console.log("Listening on port 3001"));
