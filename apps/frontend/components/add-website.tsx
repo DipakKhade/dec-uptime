@@ -15,23 +15,6 @@ export function AddWebsiteDialog({ onAddWebsite }: AddWebsiteDialogProps) {
   const [url, setUrl] = useState("");
   const [open, setOpen] = useState(false);
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!url) {
-      return;
-    }
-    
-    // Basic URL validation
-    try {
-      new URL(url.startsWith('http') ? url : `https://${url}`);
-      onAddWebsite(url);
-      setUrl("");
-      setOpen(false);
-    } catch (error) {
-        console.error(error);
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -43,14 +26,13 @@ export function AddWebsiteDialog({ onAddWebsite }: AddWebsiteDialogProps) {
           Add Website
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-monitor-card text-white border-gray-700">
+      <DialogContent className="sm:max-w-[425px] text-white border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-white">Add Website to Monitor</DialogTitle>
           <DialogDescription className="text-gray-400">
             Enter the URL of the website you want to monitor
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="url" className="text-right text-gray-300">
@@ -69,11 +51,21 @@ export function AddWebsiteDialog({ onAddWebsite }: AddWebsiteDialogProps) {
             <Button 
               type="submit" 
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={() => {
+                // Basic URL validation
+                try {
+                //   new URL(url.startsWith('http') ? url : `https://${url}`);
+                  onAddWebsite(url);
+                  setUrl("");
+                  setOpen(false);
+                } catch (error) {
+                    console.error(error);
+                }
+              }}
             >
               Add to Monitoring
             </Button>
           </DialogFooter>
-        </form>
       </DialogContent>
     </Dialog>
   );
