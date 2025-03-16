@@ -14,18 +14,10 @@ export const Appbar = () => {
         </Link>
         <div>
         <div className="flex items-center space-x-1">
-              <Link href="#features" className="text-sm font-medium transition-colors hover:text-solana px-3 py-2">
-                Features
+              <Link href="/websites" className="text-sm font-medium transition-colors hover:text-solana px-3 py-2">
+                Your Websites
               </Link>
-              <Link href="#pricing" className="text-sm font-medium transition-colors hover:text-solana px-3 py-2">
-                Pricing
-              </Link>
-              <Link href="#about" className="text-sm font-medium transition-colors hover:text-solana px-3 py-2">
-                About
-              </Link>
-              <Link href="#contact" className="text-sm font-medium transition-colors hover:text-solana px-3 py-2">
-                Contact
-              </Link>
+             
               <ModeToggle />
               <SignedOut>
               <SignInButton />

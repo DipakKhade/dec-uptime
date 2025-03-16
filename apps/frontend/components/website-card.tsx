@@ -7,19 +7,21 @@ import { Trash2 } from "lucide-react";
 import { BACKEND_URL } from "@/config";
 import axios from "axios";
 
-interface WebsiteCardProps {
-  website: Website;
-}
 
-export function WebsiteCard({ website }: WebsiteCardProps) {
+export function WebsiteCard({ website, refreshWebSiteList }:{
+    website:Website,
+    refreshWebSiteList:(val:boolean) => void
+}) {
 
     const deleteWebsite = async() => {
         const res = await axios.delete(`${BACKEND_URL}/api/v1/deletesite`, {
             data: {
-                url: website.id
+                id: website.id
             }
         });
-        console.log(res.data);
+        if(res.status === 200){
+            refreshWebSiteList(true);
+        }
     };
   return (
     <div className="bg-monitor-card rounded-lg p-6 mb-4 transition-all duration-300 hover:shadow-lg border border-gray-700 animate-fade-up">

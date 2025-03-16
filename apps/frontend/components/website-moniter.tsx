@@ -87,7 +87,7 @@ export function WebsiteMonitor() {
       
       <div className="space-y-6">
         {websites?.map(website => (
-          <WebsiteCard key={website.id} website={website} />
+          <WebsiteCard key={website.id} website={website} refreshWebSiteList={SetFefreshWebsites} />
         ))}
       </div>
     </div>

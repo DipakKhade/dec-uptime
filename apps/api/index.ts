@@ -38,7 +38,8 @@ app.get('/api/v1/getsites', async(req, res) => {
 });
 
 app.delete('/api/v1/deletesite', async(req, res) => { 
-    const userId = req.userId!;
+    try{
+        const userId = req.userId!;
     const websiteId = req.body.id;
     const website = await prisma.website.delete({
         where: {
@@ -46,7 +47,12 @@ app.delete('/api/v1/deletesite', async(req, res) => {
             userId
         }
     });
-    res.json(website);
+    res.json({
+        message: "Website deleted successfully"
+    });
+    }catch(e){
+        res.status(500).json({error:e});
+    }
 });
 
 app.listen(3001, () => console.log("Listening on port 3001"));
