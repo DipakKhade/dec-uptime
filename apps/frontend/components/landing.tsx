@@ -1,8 +1,6 @@
-import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Globe, Shield, Clock, Activity, CheckCircle, Server, Zap, ArrowRight } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 export default function LandingPage() {
   return (
@@ -21,7 +19,7 @@ export default function LandingPage() {
                     Global Website Monitoring <span className="gradient-text">Powered by Solana</span>
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Monitor your website's uptime with our decentralized network of Solana validators. Get real-time
+                    Monitor your website&apos;s uptime with our decentralized network of Solana validators. Get real-time
                     alerts and detailed analytics.
                   </p>
                 </div>
