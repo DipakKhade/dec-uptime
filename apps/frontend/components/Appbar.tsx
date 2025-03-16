@@ -1,11 +1,11 @@
 import { Activity } from "lucide-react"
 import { ModeToggle } from "./ui/mode-toggle"
-import { Button } from "./ui/button"
 import Link from "next/link"
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 
 export const Appbar = () => {
     return <>
-     <nav className="flex items-center space-x-1 justify-around pt-4">
+     <nav className="flex items-center space-x-1 justify-between px-4 py-4">
         <div className="flex gap-2">
         <Activity className="h-6 w-6 text-solana" />
         <span className="font-bold text-xl gradient-text">dec-uptime</span>
@@ -25,7 +25,13 @@ export const Appbar = () => {
                 Contact
               </Link>
               <ModeToggle />
-              <Button className="solana-gradient hover:opacity-90 transition-opacity">Sign In</Button>
+              <SignedOut>
+              <SignInButton />
+              <SignUpButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
             </div>
         </div>
      </nav>

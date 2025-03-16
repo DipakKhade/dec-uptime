@@ -1,10 +1,13 @@
-import { ReactNode } from "react"
-import { ThemeProvider as NextThemesProvider } from "next-themes"
 
-export const Providers = ({children, ...props}:{
-    children:ReactNode,
-})=>{
+import { ClerkProvider } from "@clerk/nextjs"
+import { ReactNode } from "react"
+
+export const Providers = ({children}:{
+    children:ReactNode
+}) =>{
     return <>
-    
+        <ClerkProvider>
+            {children}
+        </ClerkProvider>
     </>
 }
