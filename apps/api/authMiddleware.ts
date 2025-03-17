@@ -1,10 +1,24 @@
-import type { NextFunction, Request, Response } from "express";
+import { verifyToken } from '@clerk/backend';
+import type { NextFunction, Request, Response } from 'express';
 
-export const authMiddleware = (req:Request, res:Response, next:NextFunction) => {
-    // const token = req.headers.authorization;
-    // if (!token) {
-    //     return res.status(401).json({ message: "Unauthorized" });
-    // }
-    req.userId = "asd";
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    console.log(req.headers)
+    const bearerToken = req.headers.authorization;
+    const token = bearerToken!.split(' ')[1];
+
+    if (!bearerToken) {
+      return Response.json({ error: 'Token not found. User must sign in.' }, { status: 401 });
+    }
+
+    const verifiedToken = await verifyToken(token, {
+      jwtKey: process.env.CLERK_JWT_KEY,
+      authorizedParties: ['http://localhost:3000'], 
+    });
+    req.userId = verifiedToken.sub;
     next();
+  } catch (error) {
+    console.log(error)
+    return res.status(401).json({ error: 'Token not verified.' });
+  }
 }
