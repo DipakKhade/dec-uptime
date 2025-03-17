@@ -7,6 +7,7 @@ import { WebsiteCard } from "./website-card";
 import axios from 'axios';
 import { BACKEND_URL } from "@/config";
 import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 const getRandomStatus = (): WebsiteStatus => {
   const statuses: WebsiteStatus[] = ['up', 'down', 'unknown'];
@@ -22,7 +23,7 @@ const getRandomStatus = (): WebsiteStatus => {
   return 'unknown';
 };
 
-const generateHistory = (days: number = 90): { date: Date; status: WebsiteStatus }[] => {
+const generateHistory = (days: number = 10): { date: Date; status: WebsiteStatus }[] => {
   return Array(days).fill(null).map((_, i) => {
     const date = new Date();
     date.setDate(date.getDate() - (days - i - 1));
@@ -36,10 +37,16 @@ const generateHistory = (days: number = 90): { date: Date; status: WebsiteStatus
 export function WebsiteMonitor() {
   const [websites, setWebsites] = useState<Website[]>([]);
   const [refreshWebsites,SetFefreshWebsites] = useState<boolean>(false);
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    fetchWebsites();
+    if(isSignedIn){
+      fetchWebsites();
+    }else{
+        router.push('/');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshWebsites]);
 
   const fetchWebsites = async() => {
@@ -49,8 +56,7 @@ export function WebsiteMonitor() {
             Authorization: `Bearer ${token}`
         }
     });
-    console.log(res.data);
-    setWebsites( res.data.map((site: Partial<Website>) => {
+    setWebsites(res.data.map((site: Partial<Website>) => {
         return {
             ...site,
             status: 'unknown',

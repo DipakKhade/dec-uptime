@@ -8,18 +8,14 @@ interface StatusChartProps {
 }
 
 export function StatusChart({ history, className }: StatusChartProps) {
-  // Ensure we have data to display
-  const displayHistory = history.length > 0 
-    ? history 
-    : Array(30).fill({ status: 'unknown' as WebsiteStatus });
-
+  console.log(history);
   return (
     <div className={cn("grid gap-2 grid-cols-30 w-full", className)}>
-      {displayHistory.map((entry, index) => (
+      {history?.map((entry, index) => (
         <div
           key={index}
           className={cn(
-            "h-[20px] border rounded-md duration-300 ease-in-out",
+            "h-[10px] border rounded-md duration-300 ease-in-out",
             entry.status === 'up' ? "bg-red-400" : 
             entry.status === 'down' ? "bg-green-400" : 
             "bg-gray-400"

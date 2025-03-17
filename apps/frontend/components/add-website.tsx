@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlusCircle } from "lucide-react";
 
-
 export function AddWebsiteDialog({ onAddWebsite, refreshWebSiteList }: {
     onAddWebsite: (url: string) => void;
     refreshWebSiteList: (val:boolean) => void;
@@ -20,7 +19,7 @@ export function AddWebsiteDialog({ onAddWebsite, refreshWebSiteList }: {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button 
-          className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 flex items-center gap-2"
+          className="bg-primary flex items-center gap-2 cursor-pointer"
         >
           <PlusCircle size={18} />
           Add Website
@@ -52,12 +51,10 @@ export function AddWebsiteDialog({ onAddWebsite, refreshWebSiteList }: {
               type="submit" 
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={() => {
-                
                   onAddWebsite(url);
                   setUrl("");
                   setOpen(false);
                   refreshWebSiteList(true);
-              
               }}
             >
               Add to Monitoring
