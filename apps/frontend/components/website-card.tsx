@@ -6,15 +6,20 @@ import { StatusChart } from "./status-chart";
 import { Trash2 } from "lucide-react";
 import { BACKEND_URL } from "@/config";
 import axios from "axios";
+import { useAuth } from "@clerk/nextjs";
 
-
-export function WebsiteCard({ website, refreshWebSiteList }:{
+export const WebsiteCard = ({ website, refreshWebSiteList }:{
     website:Website,
     refreshWebSiteList:(val:boolean) => void
-}) {
-
+}) =>{
+    const { getToken } = useAuth();
+    
     const deleteWebsite = async() => {
+        const token = await getToken();
         const res = await axios.delete(`${BACKEND_URL}/api/v1/deletesite`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
             data: {
                 id: website.id
             }

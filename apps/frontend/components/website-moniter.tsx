@@ -6,8 +6,8 @@ import { AddWebsiteDialog } from "./add-website";
 import { WebsiteCard } from "./website-card";
 import axios from 'axios';
 import { BACKEND_URL } from "@/config";
+import { useAuth } from "@clerk/nextjs";
 
-// Generate random status for demo purposes
 const getRandomStatus = (): WebsiteStatus => {
   const statuses: WebsiteStatus[] = ['up', 'down', 'unknown'];
   const weights = [0.7, 0.2, 0.1]; // 70% up, 20% down, 10% unknown
@@ -36,13 +36,19 @@ const generateHistory = (days: number = 90): { date: Date; status: WebsiteStatus
 export function WebsiteMonitor() {
   const [websites, setWebsites] = useState<Website[]>([]);
   const [refreshWebsites,SetFefreshWebsites] = useState<boolean>(false);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     fetchWebsites();
   }, [refreshWebsites]);
 
   const fetchWebsites = async() => {
-    const res = await axios.get(`${BACKEND_URL}/api/v1/getsites`);
+    const token = await getToken();
+    const res = await axios.get(`${BACKEND_URL}/api/v1/getsites`, {
+        headers:{
+            Authorization: `Bearer ${token}`
+        }
+    });
     console.log(res.data);
     setWebsites( res.data.map((site: Partial<Website>) => {
         return {
