@@ -1,4 +1,3 @@
-
 import { WebsiteStatus } from "@/app/types/website";
 import { cn } from "@/lib/utils";
 
@@ -16,12 +15,14 @@ export function StatusChart({ history, className }: StatusChartProps) {
           key={index}
           className={cn(
             "h-[10px] border rounded-md duration-300 ease-in-out",
-            entry.status === 'up' ? "bg-red-400" : 
-            entry.status === 'down' ? "bg-green-400" : 
-            "bg-gray-400"
+            entry.status === "up"
+              ? "bg-red-400"
+              : entry.status === "down"
+                ? "bg-green-400"
+                : "bg-gray-400",
           )}
           style={{
-            animationDelay: `${index * 10}ms`
+            animationDelay: `${index * 10}ms`,
           }}
         />
       ))}

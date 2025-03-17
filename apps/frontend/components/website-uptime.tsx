@@ -1,4 +1,3 @@
-
 import { formatDistanceToNow } from "date-fns";
 import { Website } from "@/app/types/website";
 import { WebsiteStatusIcon } from "./website-status-icon";
@@ -25,7 +24,7 @@ export function WebsiteCard({ website }: WebsiteCardProps) {
           </p>
         </div>
       </div>
-      
+
       <div className="mt-4">
         <div className="flex justify-between text-xs text-gray-500 mb-1">
           <span>90 days ago</span>

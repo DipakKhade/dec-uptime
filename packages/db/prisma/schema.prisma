@@ -30,7 +30,15 @@ model Website {
 
 model Ticks {
   id String @id @default(uuid())
-  websiteId String
   tickId String
+  status TicksStatus
+  latency Int
+  createdAt DateTime @default(now())
+  websiteId String
   website Website @relation(fields: [websiteId], references: [id])
+}
+
+enum TicksStatus {
+  good
+  bad
 }

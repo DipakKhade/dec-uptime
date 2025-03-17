@@ -8,20 +8,26 @@ interface WebsiteStatusIconProps {
   className?: string;
 }
 
-export function WebsiteStatusIcon({ status, size = 16, className }: WebsiteStatusIconProps) {
+export function WebsiteStatusIcon({
+  status,
+  size = 16,
+  className,
+}: WebsiteStatusIconProps) {
   return (
-    <div 
+    <div
       className={cn(
         "flex items-center justify-center rounded-full w-6 h-6 transition-all",
-        status === 'up' ? "bg-monitor-up text-white" : 
-        status === 'down' ? "bg-monitor-down text-white" : 
-        "bg-monitor-unknown text-white",
-        className
+        status === "up"
+          ? "bg-monitor-up text-white"
+          : status === "down"
+            ? "bg-monitor-down text-white"
+            : "bg-monitor-unknown text-white",
+        className,
       )}
     >
-      {status === 'up' && <Check size={size} />}
-      {status === 'down' && <X size={size} />}
-      {status === 'unknown' && <HelpCircle size={size} />}
+      {status === "up" && <Check size={size} />}
+      {status === "down" && <X size={size} />}
+      {status === "unknown" && <HelpCircle size={size} />}
     </div>
   );
 }

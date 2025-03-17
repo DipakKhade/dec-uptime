@@ -1,4 +1,4 @@
-export type WebsiteStatus = 'up' | 'down' | 'unknown';
+export type WebsiteStatus = "up" | "down" | "unknown";
 
 export interface Website {
   id: string;

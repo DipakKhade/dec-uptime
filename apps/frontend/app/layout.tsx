@@ -28,17 +28,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      
       <Providers>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-        <Appbar/>
-        {children}
-        <Footer/>
-        </ThemeProvider>
-      </body>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Appbar />
+            {children}
+            <Footer />
+          </ThemeProvider>
+        </body>
       </Providers>
     </html>
   );
