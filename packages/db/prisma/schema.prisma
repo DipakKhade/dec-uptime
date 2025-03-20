@@ -28,14 +28,23 @@ model Website {
   ticks Ticks[]
 }
 
+model Validator {
+  id String @id @default(uuid())
+  publicKey String
+  ip String
+  location String
+  tick Ticks[]
+}
+
 model Ticks {
   id String @id @default(uuid())
-  tickId String
   status TicksStatus
   latency Int
   createdAt DateTime @default(now())
   websiteId String
+  validatorId String
   website Website @relation(fields: [websiteId], references: [id])
+  validator Validator @relation(fields: [validatorId], references: [id])
 }
 
 enum TicksStatus {
