@@ -14,37 +14,38 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  email String @unique
-  websites Website[]
+  id          String   @id @default(uuid()) 
+  email       String   @unique
+  websites    Website[]
 }
 
 model Website {
-  id String @id @default(uuid())
-  url String
-  userId String
-  tickId String
-  user User @relation(fields: [userId], references: [id])
-  ticks Ticks[]
+  id        String @id @default(uuid())
+  url       String
+  userId    String
+  tickId    String
+  user      User @relation(fields: [userId], references: [id])
+  ticks     Ticks[]
 }
 
 model Validator {
-  id String @id @default(uuid())
-  publicKey String
-  ip String
-  location String
-  tick Ticks[]
+  id            String @id @default(uuid())
+  publicKey     String
+  ip            String
+  location      String
+  pendingPayout Int  @default(0)
+  tick          Ticks[]
 }
 
 model Ticks {
-  id String @id @default(uuid())
-  status TicksStatus
-  latency Int
-  createdAt DateTime @default(now())
-  websiteId String
-  validatorId String
-  website Website @relation(fields: [websiteId], references: [id])
-  validator Validator @relation(fields: [validatorId], references: [id])
+  id            String @id @default(uuid())
+  status        TicksStatus
+  latency       Float
+  createdAt     DateTime @default(now())
+  websiteId     String
+  validatorId   String
+  website       Website @relation(fields: [websiteId], references: [id])
+  validator     Validator @relation(fields: [validatorId], references: [id])
 }
 
 enum TicksStatus {
