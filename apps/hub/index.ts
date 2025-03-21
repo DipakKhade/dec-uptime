@@ -35,6 +35,7 @@ const server = Bun.serve({
                 await signUpValidator(ws,{callbackId, ip, publickey, signedMessage});
             }else if(parsedMessage.type == "validate"){
                 const {callbackId, websiteId, validatorId, latency, signedMessage, status} = parsedMessage.data;
+                console.log("callbackId, websiteId, validatorId, latency, signedMessage, status",callbackId, websiteId, validatorId, latency, signedMessage, status)
                 await validateMessage(ws,{callbackId, websiteId, validatorId, latency, signedMessage, status});
             }
             return;
@@ -59,13 +60,22 @@ const server = Bun.serve({
                 socket: ws
             })
 
-            ws.send(JSON.stringify({
+            // ws.send(JSON.stringify({
+            //     type:"signup",
+            //     data:{
+            //         validatorId: validator.id,
+            //         callbackId
+            //     }
+            // }))
+            const currentValidator = AVAILABLE_VALIDADATORS.find(v=>validator.publicKey);
+            currentValidator?.socket.send(JSON.stringify({
                 type:"signup",
                 data:{
                     validatorId: validator.id,
                     callbackId
                 }
             }))
+            console.log(AVAILABLE_VALIDADATORS)
             return;
         }
 
@@ -90,6 +100,7 @@ const server = Bun.serve({
                 callbackId
             }
         }))
+        console.log(AVAILABLE_VALIDADATORS)
     }catch(error){
         console.log(error);
     }
@@ -98,7 +109,9 @@ const server = Bun.serve({
 
   async function validateMessage(ws:ServerWebSocket<unknown>,{callbackId, websiteId, validatorId, latency, signedMessage, status}:DataValidatorOutgoingMessage){
     try{
+        console.log("control is here in validateMessage")
         const validator = AVAILABLE_VALIDADATORS.find(v=>v.validatorId == validatorId);
+        console.log(validator)
         if(!validator){
             return;
         }
