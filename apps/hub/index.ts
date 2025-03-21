@@ -1,17 +1,19 @@
 import { randomUUIDv7, type ServerWebSocket } from "bun";
 import { type DataValidatorOutgoingMessage, type HubIncomingMessage, type HubOutgoingMessage, type SignInValidatorIncomingMessage } from "@uptime/types";
 import prisma from "db/client"
-import bs58 from 'bs58';
 import nacl from 'tweetnacl';
+import nacl_util from "tweetnacl-util"
+import { PublicKey } from "@solana/web3.js";
 
 const AVAILABLE_VALIDADATORS : {
+    validaterId: string,
     publicKey: string,
     validatorId: string,
     socket: ServerWebSocket<unknown>
 }[] = []
 
 const CALLBACKS : {
-    [callbackid:string]:(data:HubIncomingMessage)=>void
+    [callbackid:string]:(data:DataValidatorOutgoingMessage)=>void
 } = {}
 
 const VALIDATOR_INSENTIVE_LAMPORTS = 100;
@@ -19,7 +21,7 @@ const VALIDATOR_INSENTIVE_LAMPORTS = 100;
 
 const server = Bun.serve({
     fetch(req, server) {
-        console.log('control is here ', req.url);
+        console.log('control is here at socket server');
       if (server.upgrade(req)) {
         return; 
       }
@@ -34,9 +36,7 @@ const server = Bun.serve({
                 const {callbackId, ip, publickey, signedMessage} = parsedMessage.data;
                 await signUpValidator(ws,{callbackId, ip, publickey, signedMessage});
             }else if(parsedMessage.type == "validate"){
-                const {callbackId, websiteId, validatorId, latency, signedMessage, status} = parsedMessage.data;
-                console.log("callbackId, websiteId, validatorId, latency, signedMessage, status",callbackId, websiteId, validatorId, latency, signedMessage, status)
-                await validateMessage(ws,{callbackId, websiteId, validatorId, latency, signedMessage, status});
+                CALLBACKS[parsedMessage.data.callbackId](parsedMessage.data);
             }
             return;
         },
@@ -55,6 +55,7 @@ const server = Bun.serve({
         })
         if(validator){
             AVAILABLE_VALIDADATORS.push({
+                validaterId: validator.id,
                 publicKey: publickey,
                 validatorId: validator.id,
                 socket: ws
@@ -88,6 +89,7 @@ const server = Bun.serve({
             }
         })
         AVAILABLE_VALIDADATORS.push({
+            validaterId: newValidator.id,
             publicKey: publickey,
             validatorId: newValidator.id,
             socket: ws
@@ -107,32 +109,78 @@ const server = Bun.serve({
 
   }
 
-  async function validateMessage(ws:ServerWebSocket<unknown>,{callbackId, websiteId, validatorId, latency, signedMessage, status}:DataValidatorOutgoingMessage){
+ async function validateMessage(message:string,publicKey:string, signature:string){
+    const messageBytes = nacl_util.decodeUTF8(message);
+    const result = nacl.sign.detached.verify(
+        messageBytes,
+        new Uint8Array(JSON.parse(signature)),
+        new PublicKey(publicKey).toBytes(),
+    );
+    return result;
+ }
+
+  async function moniterWebsites(){
     try{
-        console.log("control is here in validateMessage")
-        const validator = AVAILABLE_VALIDADATORS.find(v=>v.validatorId == validatorId);
-        console.log(validator)
-        if(!validator){
-            return;
-        }
-        const messageUintArray = new Uint8Array(bs58.decode(signedMessage));
-        const publicKeyUintArray = new Uint8Array(bs58.decode(validator.publicKey));
-        console.log(messageUintArray,publicKeyUintArray)
-        console.log(nacl.sign.open(messageUintArray,publicKeyUintArray));
-        if(nacl.sign.open(messageUintArray,publicKeyUintArray)){
-                await updateTicks({callbackId, websiteId, validatorId, latency, status});
+        const websites = await prisma.website.findMany({
+            where:{
+                disable:false
+            }
+        })
+
+        for(let website of websites){
+            AVAILABLE_VALIDADATORS.forEach(validator =>{
+                const callbackId = randomUUIDv7();
+                console.log(`validator ${validator.publicKey} is checking ${website.url} and callback id is ${callbackId}`);
+                validator.socket.send(JSON.stringify({
+                    type:"validate",
+                    data:{
+                        websiteId:website.id,
+                        callbackId,
+                        url:website.url,
+                    }
+                }))
+
+                CALLBACKS[callbackId] = async(data:DataValidatorOutgoingMessage)=>{
+                    console.log(`validator ${validator.publicKey} got data ${JSON.stringify(data)}`);
+
+                    const verify = await validateMessage(data.signedMessage, validator.publicKey, data.signedMessage);
+
+                    if(!verify){
+                        console.log(`validator ${validator.publicKey} got bad data ${JSON.stringify(data)}`);
+                        return;
+                    }
+
+                    const txn = await prisma.$transaction(async tx=>{
+                        const ticks = await prisma.ticks.create({
+                            data:{
+                                websiteId:website.id,
+                                validatorId:validator.validaterId,
+                                latency:data.latency,
+                                status:data.status,
+                            }
+                        })
+
+                        await prisma.validator.update({
+                            where:{
+                                id:validator.validaterId
+                            },
+                            data:{
+                                pendingPayout:{
+                                    increment:VALIDATOR_INSENTIVE_LAMPORTS
+                                }
+                            }
+                        })
+                    })
+                }
+            })
         }
     }catch(error){
         console.log(error);
     }
   }
 
-  async function updateTicks({callbackId, websiteId, validatorId, latency, status}:Partial<DataValidatorOutgoingMessage>){
-    try{
-        console.log(callbackId, websiteId, validatorId, latency, status, 'from update ticks');
-    }catch(error){
-        console.log(error);
-    }
-  }
+  setTimeout(async () => {
+    await moniterWebsites();
+  }, 6 * 1000);
 
 console.log(`Listening on ${server.hostname}:${server.port}`);
