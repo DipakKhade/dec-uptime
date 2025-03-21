@@ -1,6 +1,8 @@
 import { randomUUIDv7, type ServerWebSocket } from "bun";
-import { type HubIncomingMessage, type HubOutgoingMessage, type SignInValidatorIncomingMessage } from "@uptime/types";
+import { type DataValidatorOutgoingMessage, type HubIncomingMessage, type HubOutgoingMessage, type SignInValidatorIncomingMessage } from "@uptime/types";
 import prisma from "db/client"
+import bs58 from 'bs58';
+import nacl from 'tweetnacl';
 
 const AVAILABLE_VALIDADATORS : {
     publicKey: string,
@@ -31,9 +33,9 @@ const server = Bun.serve({
             if(parsedMessage.type == "signup"){
                 const {callbackId, ip, publickey, signedMessage} = parsedMessage.data;
                 await signUpValidator(ws,{callbackId, ip, publickey, signedMessage});
-                console.log({callbackId, ip, publickey, signedMessage});
             }else if(parsedMessage.type == "validate"){
                 const {callbackId, websiteId, validatorId, latency, signedMessage, status} = parsedMessage.data;
+                await validateMessage(ws,{callbackId, websiteId, validatorId, latency, signedMessage, status});
             }
             return;
         },
@@ -92,6 +94,32 @@ const server = Bun.serve({
         console.log(error);
     }
 
+  }
+
+  async function validateMessage(ws:ServerWebSocket<unknown>,{callbackId, websiteId, validatorId, latency, signedMessage, status}:DataValidatorOutgoingMessage){
+    try{
+        const validator = AVAILABLE_VALIDADATORS.find(v=>v.validatorId == validatorId);
+        if(!validator){
+            return;
+        }
+        const messageUintArray = new Uint8Array(bs58.decode(signedMessage));
+        const publicKeyUintArray = new Uint8Array(bs58.decode(validator.publicKey));
+        console.log(messageUintArray,publicKeyUintArray)
+        console.log(nacl.sign.open(messageUintArray,publicKeyUintArray));
+        if(nacl.sign.open(messageUintArray,publicKeyUintArray)){
+                await updateTicks({callbackId, websiteId, validatorId, latency, status});
+        }
+    }catch(error){
+        console.log(error);
+    }
+  }
+
+  async function updateTicks({callbackId, websiteId, validatorId, latency, status}:Partial<DataValidatorOutgoingMessage>){
+    try{
+        console.log(callbackId, websiteId, validatorId, latency, status, 'from update ticks');
+    }catch(error){
+        console.log(error);
+    }
   }
 
 console.log(`Listening on ${server.hostname}:${server.port}`);
