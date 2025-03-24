@@ -3,7 +3,7 @@ import { HUB_URL } from "./config";
 import { randomUUIDv7 } from "bun";
 import { Keypair } from "@solana/web3.js";
 import nacl from "tweetnacl";
-import { decodeUTF8 } from "tweetnacl-util";
+import nacl_util from "tweetnacl-util";
 
 const CALLBACKS : {[key:string]:(data:SignUpHubOutgoingMessage) => void} = {};
 
@@ -12,53 +12,50 @@ let validatorId: string | null = null;
 function main(){
     const ws = new WebSocket(HUB_URL);
     const validatorKeyPair = Keypair.fromSecretKey(
-        Uint8Array.from(process.env.SOALANA_PRIVATE_KEY!)
+        Uint8Array.from(JSON.parse(process.env.SOALANA_PRIVATE_KEY!))
     );
 
-    ws.onopen = () => {
+    ws.onopen = async() => {
         const callbackId = randomUUIDv7();
         CALLBACKS[callbackId] = (data:SignUpHubOutgoingMessage) => {
             validatorId = data.validatorId
         }
 
-        const signedMessage = signMessage(validatorKeyPair.secretKey, `this is a message from validator ${validatorKeyPair.publicKey.toBase58()}`);
-
+        const signedMessage = await signMessage(validatorKeyPair,`Signed message for ${callbackId}, ${validatorKeyPair.publicKey}`);
         ws.send(JSON.stringify({
-            signedMessage,
-            callbackId,
-            publickey:validatorKeyPair.publicKey.toBase58(),
-            ip:''
+            type:"signup",
+            data:{
+                signedMessage,
+                callbackId,
+                publickey:validatorKeyPair.publicKey,
+                ip:''
+            }
         }))
     }
 
     ws.onmessage = (event) => {
-       const data = event.data as HubOutgoingMessage;
-
-       switch(data.type){
-        case "signup":
-            const { callbackId } = data.data;
-            CALLBACKS[callbackId](data.data);
-            delete CALLBACKS[callbackId];
-            break;
-        case "validate":
-            const {callbackId:callback_id, url, websiteId} = data.data;
-            validateMessageHandler(callback_id, url, websiteId, ws);
-            break;
+       const data = JSON.parse(event.data) as HubOutgoingMessage;
+       console.log('data from hub is this ---',data)
+       if(data.type == "signup"){
+        const { callbackId } = data.data;
+        CALLBACKS[callbackId](data.data);
+        delete CALLBACKS[callbackId];
+       }else if (data.type == "validate"){
+        const {callbackId:callback_id, url, websiteId} = data.data;
+        validateMessageHandler(validatorKeyPair,callback_id, url, websiteId, ws);
        }
     }
 }
 
 
-function signMessage(privateKey:Uint8Array<ArrayBufferLike>, message:string){
-    const messageBytes = decodeUTF8(message);
-    const signature = nacl.sign.detached(messageBytes, privateKey);
-
+async function signMessage(keypair:Keypair, message:string){
+    const messageBytes = nacl_util.decodeUTF8(message);
+    const signature = nacl.sign.detached(messageBytes, keypair.secretKey);
     return JSON.stringify(Array.from(signature));
 }
 
-function validateMessageHandler(callback_id:string, url:string, websiteId:string, ws:WebSocket){
-    console.log(`got validate message ${url}`);
-    const signedMessage = signMessage(Uint8Array.from(process.env.SOALANA_PRIVATE_KEY!), `this is a message from validator ${validatorId} for website ${websiteId}`);
+async function validateMessageHandler(keypair:Keypair,callback_id:string, url:string, websiteId:string, ws:WebSocket){
+    const signedMessage =await signMessage(keypair, `Replying to ${callback_id}`);
     const startTime = Date.now();
     fetch(url).then(async (res) => {
         const endTime = Date.now();
@@ -66,12 +63,15 @@ function validateMessageHandler(callback_id:string, url:string, websiteId:string
         const status = res.status;
         console.log(`got response from ${url} with status ${status} and latency ${latency}`);
         ws.send(JSON.stringify({
-            callbackId:callback_id,
-            websiteId,
-            validatorId,
-            latency,
-            signedMessage,
-            status : status === 200 ? "good" : "bad"
+            type:"validate",
+            data:{
+                callbackId:callback_id,
+                websiteId,
+                validatorId,
+                latency,
+                signedMessage,
+                status : status === 200 ? "good" : "bad"
+            }
         }))
     }).catch((err:any)=>{
         const endTime = Date.now();
