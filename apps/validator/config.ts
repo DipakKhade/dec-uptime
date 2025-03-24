@@ -1,0 +1,1 @@
+export const HUB_URL = "ws://localhost:8080";
