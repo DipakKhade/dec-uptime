@@ -21,7 +21,6 @@ const VALIDATOR_INSENTIVE_LAMPORTS = 100;
 
 const server = Bun.serve({
     fetch(req, server) {
-        console.log('control is here at socket server');
       if (server.upgrade(req)) {
         return; 
       }
@@ -30,12 +29,25 @@ const server = Bun.serve({
     port: 8080,
     websocket: {
         async message(ws: ServerWebSocket<unknown>, message: string):Promise<any> {
-            console.log(message);
             const parsedMessage: HubIncomingMessage  = JSON.parse(message);
             if(parsedMessage.type == "signup"){
-                const {callbackId, ip, publickey, signedMessage} = parsedMessage.data;
-                await signUpValidator(ws,{callbackId, ip, publickey, signedMessage});
+                console.log('data from hub is this ---',parsedMessage)
+                console.log(`Signed message for ${parsedMessage.data.callbackId}, ${parsedMessage.data.publickey}`,
+                    parsedMessage.data.publickey,
+                    parsedMessage.data.signedMessage)
+                const verified = await validateMessage(
+                    `Signed message for ${parsedMessage.data.callbackId}, ${parsedMessage.data.publickey}`,
+                    parsedMessage.data.publickey,
+                    parsedMessage.data.signedMessage
+                );
+                if (verified) {
+                    console.log('message is verified');
+                    const {callbackId, ip, publickey, signedMessage} = parsedMessage.data;
+                    await signUpValidator(ws,{callbackId, ip, publickey, signedMessage});   
+                }
+                
             }else if(parsedMessage.type == "validate"){
+                ///this function logic in implimented before req is sended in moniterWebsites fn
                 CALLBACKS[parsedMessage.data.callbackId](parsedMessage.data);
             }
             return;
@@ -61,15 +73,7 @@ const server = Bun.serve({
                 socket: ws
             })
 
-            // ws.send(JSON.stringify({
-            //     type:"signup",
-            //     data:{
-            //         validatorId: validator.id,
-            //         callbackId
-            //     }
-            // }))
-            const currentValidator = AVAILABLE_VALIDADATORS.find(v=>validator.publicKey);
-            currentValidator?.socket.send(JSON.stringify({
+            ws.send(JSON.stringify({
                 type:"signup",
                 data:{
                     validatorId: validator.id,
@@ -88,6 +92,7 @@ const server = Bun.serve({
                 location:'unknown',
             }
         })
+
         AVAILABLE_VALIDADATORS.push({
             validaterId: newValidator.id,
             publicKey: publickey,
@@ -102,7 +107,6 @@ const server = Bun.serve({
                 callbackId
             }
         }))
-        console.log(AVAILABLE_VALIDADATORS)
     }catch(error){
         console.log(error);
     }
@@ -126,7 +130,7 @@ const server = Bun.serve({
                 disable:false
             }
         })
-
+        console.log(`got ${websites.length} websites to check`);
         for(let website of websites){
             AVAILABLE_VALIDADATORS.forEach(validator =>{
                 const callbackId = randomUUIDv7();
@@ -141,17 +145,17 @@ const server = Bun.serve({
                 }))
 
                 CALLBACKS[callbackId] = async(data:DataValidatorOutgoingMessage)=>{
-                    console.log(`validator ${validator.publicKey} got data ${JSON.stringify(data)}`);
-
-                    const verify = await validateMessage(data.signedMessage, validator.publicKey, data.signedMessage);
-
+                    console.log('data from validator is this ---',`Replying to ${data.callbackId}`, validator.publicKey, data.signedMessage)
+                    const verify = await validateMessage(`Replying to ${data.callbackId}`, validator.publicKey, data.signedMessage);
+       
                     if(!verify){
                         console.log(`validator ${validator.publicKey} got bad data ${JSON.stringify(data)}`);
                         return;
                     }
 
+                    console.log('verify>>>>>>',verify);
                     const txn = await prisma.$transaction(async tx=>{
-                        const ticks = await prisma.ticks.create({
+                        const ticks = await tx.ticks.create({
                             data:{
                                 websiteId:website.id,
                                 validatorId:validator.validaterId,
@@ -159,8 +163,8 @@ const server = Bun.serve({
                                 status:data.status,
                             }
                         })
-
-                        await prisma.validator.update({
+                        
+                        await tx.validator.update({
                             where:{
                                 id:validator.validaterId
                             },
@@ -179,8 +183,8 @@ const server = Bun.serve({
     }
   }
 
-  setTimeout(async () => {
+  setInterval(async () => {
     await moniterWebsites();
-  }, 6 * 1000);
+  }, 4 * 1000);
 
 console.log(`Listening on ${server.hostname}:${server.port}`);
