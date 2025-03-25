@@ -11,13 +11,13 @@ export const WebsiteCard = ({
   website,
   status,
   refreshWebSiteList,
+  uptimePercentage,
 }: {
-  website: Website;
+  website: Website,
   status:WebsiteStatus,
-  refreshWebSiteList: (val: boolean) => void;
+  refreshWebSiteList: (val: boolean) => void,
+  uptimePercentage: number,
 }) => {
-  console.log('hello from asd website',website);
-  console.log('hello from asd status',status);
   const { getToken } = useAuth();
 
   const deleteWebsite = async () => {
@@ -43,7 +43,7 @@ export const WebsiteCard = ({
         </div>
         <div className="text-right">
           <p className="text-sm dark:text-gray-400">
-            100% uptime
+            {uptimePercentage}% uptime
           </p>
           <p className="text-xs text-gray-500">
             Last checked {formatDistanceToNow(website.lastChecked)} ago

@@ -1,27 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { AlertCircle } from "lucide-react";
-import { Website, WebsiteStatus } from "@/app/types/website";
+import { Website } from "@/app/types/website";
 import { AddWebsiteDialog } from "./add-website";
 import { WebsiteCard } from "./website-card";
 import axios from "axios";
 import { BACKEND_URL } from "@/config";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-
-const getRandomStatus = (): WebsiteStatus => {
-  const statuses: WebsiteStatus[] = ["good", "bad", "unknown"];
-  const weights = [0.7, 0.2, 0.1]; // 70% up, 20% down, 10% unknown
-
-  const random = Math.random();
-  let sum = 0;
-  for (let i = 0; i < weights.length; i++) {
-    sum += weights[i];
-    if (random < sum) return statuses[i];
-  }
-
-  return "unknown";
-};
 
 export function WebsiteMonitor() {
   const [websites, setWebsites] = useState<Website[]>([]);
@@ -31,7 +17,7 @@ export function WebsiteMonitor() {
 
   useEffect(() => {
     if (isSignedIn) {
-      fetchWebsites();
+      fetchWebsites()
     } else {
       router.push("/");
     }
@@ -77,6 +63,11 @@ export function WebsiteMonitor() {
     }
   };
 
+  const uptimePercentage = (website:Website)=>{
+   const {ticks} = website;
+   return Math.ceil((ticks.filter(t=>t.status === "good")).length/ticks.length*100);
+  };
+
   const hasDownWebsites = websites?.some((site) => site.status === "bad");
 
   const getCurrentStatus = (website: Website) => {
@@ -94,8 +85,7 @@ export function WebsiteMonitor() {
               Some services are down
             </h2>
             <p className="text-gray-300">
-              Last updated on {new Date().toLocaleDateString()} at{" "}
-              {new Date().toLocaleTimeString()}
+              Last updated 
             </p>
           </div>
         </div>
@@ -118,6 +108,7 @@ export function WebsiteMonitor() {
             website={website}
             status={getCurrentStatus(website)}
             refreshWebSiteList={SetFefreshWebsites}
+            uptimePercentage={uptimePercentage(website)}
           />
         ))}
       </div>
