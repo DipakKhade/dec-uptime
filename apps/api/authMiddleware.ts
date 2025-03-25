@@ -11,7 +11,7 @@ export const authMiddleware = async (
     const bearerToken = req.headers.authorization;
     const token = bearerToken!.split(" ")[1];
 
-    if (!bearerToken) {
+    if (!token) {
       return Response.json(
         { error: "Token not found. User must sign in." },
         { status: 401 },

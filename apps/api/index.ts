@@ -33,6 +33,14 @@ app.get("/api/v1/getsites", async (req, res) => {
     where: {
       userId,
     },
+    include:{
+      ticks:{
+        take: 12,
+        orderBy:{
+          createdAt:"asc"
+        }
+      }
+    }
   });
   res.json(websites);
 });
