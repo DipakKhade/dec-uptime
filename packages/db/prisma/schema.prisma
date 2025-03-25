@@ -26,6 +26,7 @@ model Website {
   tickId    String
   user      User @relation(fields: [userId], references: [id])
   ticks     Ticks[]
+  disable   Boolean @default(false)
 }
 
 model Validator {
