@@ -31,23 +31,17 @@ const server = Bun.serve({
         async message(ws: ServerWebSocket<unknown>, message: string):Promise<any> {
             const parsedMessage: HubIncomingMessage  = JSON.parse(message);
             if(parsedMessage.type == "signup"){
-                console.log('data from hub is this ---',parsedMessage)
-                console.log(`Signed message for ${parsedMessage.data.callbackId}, ${parsedMessage.data.publickey}`,
-                    parsedMessage.data.publickey,
-                    parsedMessage.data.signedMessage)
                 const verified = await validateMessage(
                     `Signed message for ${parsedMessage.data.callbackId}, ${parsedMessage.data.publickey}`,
                     parsedMessage.data.publickey,
                     parsedMessage.data.signedMessage
                 );
                 if (verified) {
-                    console.log('message is verified');
                     const {callbackId, ip, publickey, signedMessage} = parsedMessage.data;
                     await signUpValidator(ws,{callbackId, ip, publickey, signedMessage});   
                 }
                 
             }else if(parsedMessage.type == "validate"){
-                ///this function logic in implimented before req is sended in moniterWebsites fn
                 CALLBACKS[parsedMessage.data.callbackId](parsedMessage.data);
             }
             return;
@@ -145,7 +139,6 @@ const server = Bun.serve({
                 }))
 
                 CALLBACKS[callbackId] = async(data:DataValidatorOutgoingMessage)=>{
-                    console.log('data from validator is this ---',`Replying to ${data.callbackId}`, validator.publicKey, data.signedMessage)
                     const verify = await validateMessage(`Replying to ${data.callbackId}`, validator.publicKey, data.signedMessage);
        
                     if(!verify){
@@ -185,6 +178,6 @@ const server = Bun.serve({
 
   setInterval(async () => {
     await moniterWebsites();
-  }, 4 * 1000);
+  }, 60 * 1000);
 
 console.log(`Listening on ${server.hostname}:${server.port}`);
