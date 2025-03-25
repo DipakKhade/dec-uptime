@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function LandingPage() {
   return (
@@ -25,6 +26,7 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
+                  <Link href={'/moniter'}>
                   <Button
                     size="lg"
                     className="px-8 solana-gradient hover:opacity-90 transition-opacity group cursor-pointer"
@@ -32,6 +34,7 @@ export default function LandingPage() {
                     Start Monitoring
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Button>
+                  </Link>
                 </div>
               </div>
               <div className="flex items-center justify-center">

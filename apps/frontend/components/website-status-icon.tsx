@@ -17,16 +17,16 @@ export function WebsiteStatusIcon({
     <div
       className={cn(
         "flex items-center justify-center rounded-full w-6 h-6 transition-all",
-        status === "up"
+        status === "good"
           ? "bg-monitor-up text-white"
-          : status === "down"
+          : status === "bad"
             ? "bg-monitor-down text-white"
             : "bg-monitor-unknown text-white",
         className,
       )}
     >
-      {status === "up" && <Check size={size} />}
-      {status === "down" && <X size={size} />}
+      {status === "good" && <Check className="text-green-500" size={size} />}
+      {status === "bad" && <X className="text-red-500" size={size} />}
       {status === "unknown" && <HelpCircle size={size} />}
     </div>
   );

@@ -17,10 +17,10 @@ export const Appbar = () => {
         <div>
           <div className="flex items-center space-x-1">
             <Link
-              href="/websites"
+              href="/moniter"
               className="text-sm font-medium transition-colors hover:text-solana px-3 py-2"
             >
-              Your Websites
+              Moniter
             </Link>
             <div className="flex space-x-3.5">
               <ModeToggle />

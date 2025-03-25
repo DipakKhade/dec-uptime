@@ -10,7 +10,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
 const getRandomStatus = (): WebsiteStatus => {
-  const statuses: WebsiteStatus[] = ["up", "down", "unknown"];
+  const statuses: WebsiteStatus[] = ["good", "bad", "unknown"];
   const weights = [0.7, 0.2, 0.1]; // 70% up, 20% down, 10% unknown
 
   const random = Math.random();
@@ -21,21 +21,6 @@ const getRandomStatus = (): WebsiteStatus => {
   }
 
   return "unknown";
-};
-
-const generateHistory = (
-  days: number = 10,
-): { date: Date; status: WebsiteStatus }[] => {
-  return Array(days)
-    .fill(null)
-    .map((_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (days - i - 1));
-      return {
-        date,
-        status: getRandomStatus(),
-      };
-    });
 };
 
 export function WebsiteMonitor() {
@@ -66,7 +51,12 @@ export function WebsiteMonitor() {
           ...site,
           status: "unknown",
           lastChecked: new Date(),
-          history: generateHistory(),
+          history:site?.ticks!.map((tick)=>{
+            return {
+              date: tick.createdAt,
+              status: tick.status,
+            }
+          }),
           uptime: 100,
         };
       }),
@@ -74,17 +64,25 @@ export function WebsiteMonitor() {
   };
 
   const handleAddWebsite = async (url: string) => {
-    const formattedUrl = url.replace(/^(https?:\/\/)?(www\.)?/, "");
+    const token = await getToken();
     const res = await axios.post(`${BACKEND_URL}/api/v1/addsite`, {
-      url: formattedUrl,
+        url
+    },{
+      headers:{
+        Authorization: `Bearer ${token}`,
+      },
     });
-    console.log(res.data);
-    if (res.data.status === "success") {
+    if (res.status === 200) {
       fetchWebsites();
     }
   };
 
-  const hasDownWebsites = websites?.some((site) => site.status === "down");
+  const hasDownWebsites = websites?.some((site) => site.status === "bad");
+
+  const getCurrentStatus = (website: Website) => {
+    const {ticks} = website;
+    return ticks[ticks.length - 1]?.status ?? "unknown";
+  };
 
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8">
@@ -118,6 +116,7 @@ export function WebsiteMonitor() {
           <WebsiteCard
             key={website.id}
             website={website}
+            status={getCurrentStatus(website)}
             refreshWebSiteList={SetFefreshWebsites}
           />
         ))}

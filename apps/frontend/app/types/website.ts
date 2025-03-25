@@ -1,13 +1,13 @@
-export type WebsiteStatus = "up" | "down" | "unknown";
+export type WebsiteStatus = "good" | "bad" | "unknown";
 
 export interface Website {
   id: string;
   url: string;
   status: WebsiteStatus;
-  uptime: number;
   lastChecked: Date;
-  history: {
-    date: Date;
+  ticks: {
     status: WebsiteStatus;
+    latency: number;
+    createdAt: Date;
   }[];
 }
