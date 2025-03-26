@@ -45,7 +45,7 @@ model Ticks {
   createdAt     DateTime @default(now())
   websiteId     String
   validatorId   String
-  website       Website @relation(fields: [websiteId], references: [id])
+  website       Website @relation(fields: [websiteId], references: [id], onDelete: Cascade)
   validator     Validator @relation(fields: [validatorId], references: [id])
 }
 
