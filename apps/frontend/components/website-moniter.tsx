@@ -21,6 +21,10 @@ export function WebsiteMonitor() {
     } else {
       router.push("/");
     }
+    const interval = setInterval(() => {
+      fetchWebsites(); 
+    }, 6 * 10000);
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshWebsites]);
 
@@ -35,7 +39,7 @@ export function WebsiteMonitor() {
       res.data.map((site: Partial<Website>) => {
         return {
           ...site,
-          status: "unknown",
+          status: site.status ?? "unknown",
           lastChecked: new Date(),
           history:site?.ticks!.map((tick)=>{
             return {
@@ -93,7 +97,7 @@ export function WebsiteMonitor() {
 
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-semibold text-white">
-          Current status by service
+          Current Status of Your Websites
         </h1>
         <AddWebsiteDialog
           onAddWebsite={handleAddWebsite}

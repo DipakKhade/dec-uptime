@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { HeroAddWebsite } from "./hero-add-website";
 
 export default function LandingPage() {
   return (
@@ -26,7 +26,7 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link href={'/moniter'}>
+                  <Link href={'/monitor'}>
                   <Button
                     size="lg"
                     className="px-8 solana-gradient hover:opacity-90 transition-opacity group cursor-pointer"
@@ -37,35 +37,7 @@ export default function LandingPage() {
                   </Link>
                 </div>
               </div>
-              <div className="flex items-center justify-center">
-                <div className="rounded-xl border bg-card p-6 shadow-lg w-full max-w-md gradient-border animate-float">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <h3 className="text-xl font-bold gradient-text">
-                        Start Monitoring Now
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Enter your website URL to begin monitoring
-                      </p>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="space-y-1">
-                        <Input
-                          type="url"
-                          placeholder="https://yourwebsite.com"
-                          className="rounded-lg border-input bg-background h-12 transition-all focus-visible:ring-2 focus-visible:ring-solana"
-                        />
-                      </div>
-                      <Button className="w-full h-12 bg-green-400 cursor-pointer hover:opacity-90 transition-opacity">
-                        Check Uptime
-                      </Button>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      No credit card required. Start with our free plan.
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <HeroAddWebsite/>
             </div>
           </div>
         </section>

@@ -43,7 +43,7 @@ export const WebsiteCard = ({
         </div>
         <div className="text-right">
           <p className="text-sm dark:text-gray-400">
-            {uptimePercentage}% uptime
+            {uptimePercentage ?? "Unknown"}% uptime
           </p>
           <p className="text-xs text-gray-500">
             Last checked {formatDistanceToNow(website.lastChecked)} ago
