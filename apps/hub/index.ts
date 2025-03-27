@@ -178,6 +178,6 @@ const server = Bun.serve({
 
   setInterval(async () => {
     await moniterWebsites();
-  }, 60 * 1000);
+  }, 600 * 1000);
 
 console.log(`Listening on ${server.hostname}:${server.port}`);
